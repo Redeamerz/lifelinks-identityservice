@@ -40,7 +40,7 @@ namespace Identity_Service
 
 					ClientSecrets =
 					{
-						new Secret("".Sha256())
+						new Secret("lifelinksidentitysecret".Sha256())
 					},
 					AllowedScopes =
 					{

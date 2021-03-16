@@ -1,5 +1,7 @@
 using Identity_Service.Data;
 using Identity_Service.Models;
+using IdentityServer4.EntityFramework.DbContexts;
+using IdentityServer4.EntityFramework.Mappers;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -15,6 +17,7 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Identity_Service
@@ -40,16 +43,39 @@ namespace Identity_Service
 				.AddEntityFrameworkStores<ApplicationDbContext>()
 				.AddDefaultTokenProviders();
 
-			services.AddCors();
+			services.AddTransient<IProfileService, IdentityClaimsProfileService>();
 
+			var migrationAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
+
+			// configure identity server with in-memory stores, keys, clients and scopes
 			services.AddIdentityServer()
 				.AddDeveloperSigningCredential()
-				.AddInMemoryApiResources(Config.GetApiResources())
-				.AddInMemoryClients(Config.GetClients())
-				.AddInMemoryIdentityResources(Config.GetIdentityResources())
-				.AddAspNetIdentity<AppUser>();
+				.AddAspNetIdentity<AppUser>()
+				//.AddInMemoryApiResources(Config.GetApiResources())
+				//.AddInMemoryClients(Config.GetClients())
+				//.AddInMemoryIdentityResources(Config.GetIdentityResources())
+				
+			.AddConfigurationStore(options =>
+			{
+				options.ConfigureDbContext = builder =>
 
-			services.AddTransient<IProfileService, IdentityClaimsProfileService>();
+					builder.UseMySql(Configuration.GetConnectionString("Default"),
+						mySql => mySql.MigrationsAssembly(migrationAssembly));
+
+			})
+			.AddOperationalStore(options =>
+			{
+				options.ConfigureDbContext = builder =>
+				builder.UseMySql(Configuration.GetConnectionString("Default"),
+				mySql => mySql.MigrationsAssembly(migrationAssembly));
+
+				// token cleanup
+				options.EnableTokenCleanup = true;
+				options.TokenCleanupInterval = 30;
+			});
+
+			services.AddCors();
+
 
 			services.AddControllers();
 			services.AddSwaggerGen(c =>
@@ -61,6 +87,9 @@ namespace Identity_Service
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
+			// seed database with start data if empty
+			InitializeDatabase(app);
+
 			if (env.IsDevelopment())
 			{
 				app.UseDeveloperExceptionPage();
@@ -85,6 +114,42 @@ namespace Identity_Service
 			{
 				endpoints.MapControllers();
 			});
+		}
+		private void InitializeDatabase(IApplicationBuilder app)
+		{
+			using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+			{
+				serviceScope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>().Database.Migrate();
+
+				var context = serviceScope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
+				context.Database.Migrate();
+				if (!context.Clients.Any())
+				{
+					foreach (var client in Config.GetClients())
+					{
+						context.Clients.Add(client.ToEntity());
+					}
+					context.SaveChanges();
+				}
+
+				if (!context.IdentityResources.Any())
+				{
+					foreach (var resource in Config.GetIdentityResources())
+					{
+						context.IdentityResources.Add(resource.ToEntity());
+					}
+					context.SaveChanges();
+				}
+
+				if (!context.ApiResources.Any())
+				{
+					foreach (var resource in Config.GetApiResources())
+					{
+						context.ApiResources.Add(resource.ToEntity());
+					}
+					context.SaveChanges();
+				}
+			}
 		}
 	}
 }
