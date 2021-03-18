@@ -51,9 +51,6 @@ namespace Identity_Service
 			services.AddIdentityServer()
 				.AddDeveloperSigningCredential()
 				.AddAspNetIdentity<AppUser>()
-				//.AddInMemoryApiResources(Config.GetApiResources())
-				//.AddInMemoryClients(Config.GetClients())
-				//.AddInMemoryIdentityResources(Config.GetIdentityResources())
 				
 			.AddConfigurationStore(options =>
 			{
