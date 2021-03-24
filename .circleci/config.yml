@@ -25,6 +25,7 @@ jobs:
         docker-context: ./Identity-Service
      - docker/push:
         image: redeamerz/lifelinks-identity-service
+    
 
 workflows:
   version: 2
@@ -35,3 +36,7 @@ workflows:
           context: Development
           requires:
             - build
+          filters:
+            branches:
+              only:
+                - master
