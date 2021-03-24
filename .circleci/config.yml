@@ -1,12 +1,37 @@
- version: 2.1
+version: 2.1
 
- orbs:
-  win: circleci/windows@2.2.0
+orbs:
+  win: circleci/windows@2
+  docker: circleci/docker@1
 
- jobs:
-   build:
-     executor: win/default     
-    
-     steps:
-       - checkout
-       - run: dotnet build
+jobs:
+  build:
+   executor: win/default
+   steps:
+     - checkout
+     - run:
+        name: build dotnet project
+        command: dotnet build ./Identity-Service
+     
+  dockerhub-deploy:
+    executor: docker/docker
+    steps:
+     - setup_remote_docker
+     - checkout
+     - docker/check
+     - docker/build:
+        image: redeamerz/lifelinks-identity-service
+        path: ./Identity-Service
+        docker-context: ./Identity-Service
+     - docker/push:
+        image: redeamerz/lifelinks-identity-service
+
+workflows:
+  version: 2
+  build-and-publish:
+    jobs:
+      - build
+      - dockerhub-deploy:
+          context: Development
+          requires:
+            - build
