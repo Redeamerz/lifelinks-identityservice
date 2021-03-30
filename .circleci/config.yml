@@ -23,12 +23,13 @@ jobs:
         image: redeamerz/lifelinks-identity-service
         path: ./Identity-Service
         docker-context: ./Identity-Service
+        tag: latest
      - docker/push:
         image: redeamerz/lifelinks-identity-service
+        tag: latest
     
 
 workflows:
-  version: 2
   build-and-publish:
     jobs:
       - build
