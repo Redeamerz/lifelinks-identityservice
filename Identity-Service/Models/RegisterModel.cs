@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Identity_Service.Models
 {
-	public class RegisterViewModel
+	public class RegisterModel
 	{
         [Required]
         [StringLength(50, ErrorMessage = "The {0} must be at least {2}, at max {1} characters long and unique.", MinimumLength = 3)]

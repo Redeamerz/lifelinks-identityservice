@@ -3,6 +3,7 @@ using Identity_Service.Models;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Mappers;
 using IdentityServer4.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -51,7 +52,7 @@ namespace Identity_Service
 			services.AddIdentityServer()
 				.AddDeveloperSigningCredential()
 				.AddAspNetIdentity<AppUser>()
-				
+
 			.AddConfigurationStore(options =>
 			{
 				options.ConfigureDbContext = builder =>
@@ -70,6 +71,9 @@ namespace Identity_Service
 				options.EnableTokenCleanup = true;
 				options.TokenCleanupInterval = 30;
 			});
+
+			services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+				.AddCookie();
 
 			services.AddCors();
 

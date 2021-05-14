@@ -1,4 +1,9 @@
-﻿using Identity_Service.Models;
+﻿using Identity_Service.AccountConfig;
+using Identity_Service.Models;
+using IdentityServer4;
+using IdentityServer4.Events;
+using IdentityServer4.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -16,15 +21,19 @@ namespace Identity_Service.Controllers
 	{
 		private readonly RoleManager<IdentityRole> roleManager;
 		private readonly UserManager<AppUser> userManager;
+		private readonly IEventService eventService;
+		private readonly SignInManager<AppUser> signInManager;
 
-		public AccountController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager)
+		public AccountController(RoleManager<IdentityRole> roleManager, UserManager<AppUser> userManager, IEventService eventService, SignInManager<AppUser> signInManager)
 		{
-			this.userManager = userManager;
 			this.roleManager = roleManager;
+			this.userManager = userManager;
+			this.eventService = eventService;
+			this.signInManager = signInManager;
 		}
 
 		[HttpPost("Register")]
-		public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
+		public async Task<IActionResult> Register([FromBody] RegisterModel model)
 		{
 			if (!ModelState.IsValid) return BadRequest(model);
 
@@ -47,6 +56,51 @@ namespace Identity_Service.Controllers
 			await userManager.AddClaimAsync(user, new Claim("role", role));
 
 			return Created("api.lifelinks.nl/api/account/register", user);
+		}
+
+		[HttpPost("SignIn")]
+		public async Task<IActionResult> SignIn([FromBody] LoginModel model)
+		{
+			var user = await signInManager.UserManager.FindByNameAsync(model.Username);
+
+			if (user == null)
+			{
+				return BadRequest();
+			}
+
+			if ((await signInManager.CheckPasswordSignInAsync(user, model.Password, false)) == Microsoft.AspNetCore.Identity.SignInResult.Failed)
+			{
+				return BadRequest();
+			}
+
+			await eventService.RaiseAsync(new UserLoginSuccessEvent(user.Email, user.Id, user.Email));
+
+			AuthenticationProperties props = null;
+			if (AccountOptions.AllowRememberLogin && model.RememberLogin)
+			{
+				props = new AuthenticationProperties
+				{
+					IsPersistent = true,
+					ExpiresUtc = DateTimeOffset.UtcNow.Add(AccountOptions.RememberMeLoginDuration)
+				};
+			}
+
+			var issuer = new IdentityServerUser(user.Id)
+			{
+				DisplayName = user.Email
+			};
+
+			await HttpContext.SignInAsync(issuer, props);
+
+			return Ok(issuer);
+		}
+
+		[Authorize]
+		[HttpGet("check")]
+		public IActionResult CheckAuth()
+		{
+			var check = User.Identity.IsAuthenticated;
+			return Ok(check);
 		}
 	}
 }
