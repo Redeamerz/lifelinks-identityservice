@@ -2,8 +2,10 @@
 using Identity_Service.Models;
 using IdentityServer4;
 using IdentityServer4.Events;
+using IdentityServer4.Extensions;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -93,6 +95,21 @@ namespace Identity_Service.Controllers
 			await HttpContext.SignInAsync(issuer, props);
 
 			return Ok(issuer);
+		}
+
+		[HttpPost("SignOut")]
+		public async Task<IActionResult> Logout()
+		{
+			if (User?.Identity.IsAuthenticated != true)
+			{
+				return BadRequest();
+			}
+
+			await signInManager.SignOutAsync();
+
+			await eventService.RaiseAsync(new UserLogoutSuccessEvent(User.GetSubjectId(), User.GetDisplayName()));
+
+			return SignOut();
 		}
 
 		[Authorize]
