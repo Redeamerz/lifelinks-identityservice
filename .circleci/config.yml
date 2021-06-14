@@ -3,6 +3,7 @@ version: 2.1
 orbs:
   win: circleci/windows@2
   docker: circleci/docker@1
+  k8s: digitalocean/k8s@0.1.1
 
 jobs:
   build:
@@ -24,9 +25,14 @@ jobs:
         path: ./Identity-Service
         docker-context: ./Identity-Service
         tag: latest
+     - docker/build:
+        image: redeamerz/lifelinks-identity-service
+        path: ./Identity-Service
+        docker-context: ./Identity-Service
+        tag: $CIRCLE_SHA1
      - docker/push:
         image: redeamerz/lifelinks-identity-service
-        tag: latest
+        tag: 'latest,$CIRCLE_SHA1'
 
   kubernetes-deploy:
     executor: docker/docker
@@ -40,7 +46,7 @@ jobs:
           command: kubectl apply -f kubernetes
       - run:
           name: kubernetes rollout update
-          command: kubectl set image deployments/apigateway apigateway=docker.io/redeamerz/lifelinks-apigateway:$CIRCLE_SHA1
+          command: kubectl set image deployments/identityservice identityservice=docker.io/redeamerz/lifelinks-identity-service:$CIRCLE_SHA1 -n lifelinks
     
 
 workflows:
