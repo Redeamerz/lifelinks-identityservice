@@ -46,7 +46,6 @@ namespace Identity_Service
 				.AddEntityFrameworkStores<ApplicationDbContext>()
 				.AddDefaultTokenProviders();
 
-			services.AddTransient<IProfileService, IdentityClaimsProfileService>();
 
 			var migrationAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
 
@@ -54,13 +53,13 @@ namespace Identity_Service
 			services.AddIdentityServer()
 				.AddDeveloperSigningCredential()
 				.AddAspNetIdentity<AppUser>()
-				
+
 
 			.AddConfigurationStore(options =>
 			{
 				options.ConfigureDbContext = builder =>
 
-					builder.UseMySql(Configuration.GetConnectionString("Default"), new MySqlServerVersion(new Version(8,0,21)),
+					builder.UseMySql(Configuration.GetConnectionString("Default"), new MySqlServerVersion(new Version(8, 0, 21)),
 						mySql => mySql.MigrationsAssembly(migrationAssembly));
 
 			})
@@ -79,7 +78,7 @@ namespace Identity_Service
 				.AddCookie();
 
 			services.AddCors();
-
+			services.AddTransient<IProfileService, IdentityClaimsProfileService>();
 
 			services.AddControllers();
 			services.AddSwaggerGen(c =>

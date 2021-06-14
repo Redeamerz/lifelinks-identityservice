@@ -26,7 +26,7 @@ namespace Identity_Service
 		public async Task GetProfileDataAsync(ProfileDataRequestContext context)
 		{
 			var sub = context.Subject.GetSubjectId();
-			var user = await userManager.FindByNameAsync(sub);
+			var user = await userManager.FindByIdAsync(sub);
 			var principal = await claimsFactory.CreateAsync(user);
 			var roles = await userManager.GetRolesAsync(user);
 			var claims = principal.Claims.ToList();
