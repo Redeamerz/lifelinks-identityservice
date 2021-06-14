@@ -75,7 +75,7 @@ namespace Identity_Service.Controllers
 				return BadRequest();
 			}
 
-			await eventService.RaiseAsync(new UserLoginSuccessEvent(user.Email, user.Id, user.Email));
+			await eventService.RaiseAsync(new UserLoginSuccessEvent(user.UserName, user.Id, user.Email));
 
 			AuthenticationProperties props = null;
 			if (AccountOptions.AllowRememberLogin && model.RememberLogin)
@@ -89,7 +89,7 @@ namespace Identity_Service.Controllers
 
 			var issuer = new IdentityServerUser(user.Id)
 			{
-				DisplayName = user.Email
+				DisplayName = user.UserName
 			};
 
 			await HttpContext.SignInAsync(issuer, props);
