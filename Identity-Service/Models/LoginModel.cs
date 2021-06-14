@@ -8,7 +8,6 @@ namespace Identity_Service.Models
 		/// Model to verify incoming Account login request
 		/// </summary>
 		[Required]
-		[EmailAddress]
 		[Display(Name = "Username")]
 		public string Username { get; set; }
 

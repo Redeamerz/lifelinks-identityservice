@@ -15,6 +15,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Serilog;
+using Serilog.Formatting.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,7 +39,7 @@ namespace Identity_Service
 		{
 			services.AddDbContext<ApplicationDbContext>(options =>
 			{
-				options.UseMySql(Configuration.GetConnectionString("Default"));
+				options.UseMySql(Configuration.GetConnectionString("Default"), new MySqlServerVersion(new Version(8, 0, 21)));
 			});
 
 			services.AddIdentity<AppUser, IdentityRole>()
@@ -52,19 +54,20 @@ namespace Identity_Service
 			services.AddIdentityServer()
 				.AddDeveloperSigningCredential()
 				.AddAspNetIdentity<AppUser>()
+				
 
 			.AddConfigurationStore(options =>
 			{
 				options.ConfigureDbContext = builder =>
 
-					builder.UseMySql(Configuration.GetConnectionString("Default"),
+					builder.UseMySql(Configuration.GetConnectionString("Default"), new MySqlServerVersion(new Version(8,0,21)),
 						mySql => mySql.MigrationsAssembly(migrationAssembly));
 
 			})
 			.AddOperationalStore(options =>
 			{
 				options.ConfigureDbContext = builder =>
-				builder.UseMySql(Configuration.GetConnectionString("Default"),
+				builder.UseMySql(Configuration.GetConnectionString("Default"), new MySqlServerVersion(new Version(8, 0, 21)),
 				mySql => mySql.MigrationsAssembly(migrationAssembly));
 
 				// token cleanup
@@ -90,6 +93,10 @@ namespace Identity_Service
 		{
 			// seed database with start data if empty
 			InitializeDatabase(app);
+			var log = new LoggerConfiguration()
+			.Enrich.FromLogContext()
+			.WriteTo.File(new JsonFormatter(), "log.json")
+			.CreateLogger();
 
 			if (env.IsDevelopment())
 			{
