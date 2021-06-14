@@ -27,6 +27,20 @@ jobs:
      - docker/push:
         image: redeamerz/lifelinks-identity-service
         tag: latest
+
+  kubernetes-deploy:
+    executor: docker/docker
+    steps:
+      - checkout
+      - k8s/install
+      - k8s/initialize:
+          cluster: lifelinks-cluster
+      - run:
+          name: kubernetes apply schema
+          command: kubectl apply -f kubernetes
+      - run:
+          name: kubernetes rollout update
+          command: kubectl set image deployments/apigateway apigateway=docker.io/redeamerz/lifelinks-apigateway:$CIRCLE_SHA1
     
 
 workflows:
@@ -37,6 +51,14 @@ workflows:
           context: Development
           requires:
             - build
+          filters:
+            branches:
+              only:
+                - main
+      - kubernetes-deploy:
+          context: KubernetesCluster
+          requires:
+            - dockerhub-deploy
           filters:
             branches:
               only:
