@@ -60,6 +60,31 @@ namespace Identity_Service.Controllers
 			return Created("api.lifelinks.nl/api/account/register", user);
 		}
 
+		[HttpPut("Update")]
+		public async Task<IActionResult> UpdateAccount([FromBody] UpdateModel model)
+		{
+			if (!ModelState.IsValid) return BadRequest(model);
+
+
+			var user = await userManager.FindByIdAsync(model.Id);
+
+			if (user == null)
+			{
+				return BadRequest();
+			}
+
+			if (user.NormalizedEmail != model.Email.Normalize())
+			{
+				var token = await userManager.GenerateChangeEmailTokenAsync(user, model.Email);
+				var result = await userManager.ChangeEmailAsync(user, model.Email, token);
+			}
+			if (user.NormalizedUserName != model.Username.Normalize())
+			{
+				await userManager.SetUserNameAsync(user, model.Username);
+			}
+			return NoContent();
+		}
+
 		[HttpPost("SignIn")]
 		public async Task<IActionResult> SignIn([FromBody] LoginModel model)
 		{
