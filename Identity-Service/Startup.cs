@@ -77,10 +77,10 @@ namespace Identity_Service
 
 			services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
 				.AddCookie();
-			
 
-			//services.AddSingleton<IHostedService, KafkaConsumerHandler>();
-			//services.AddSingleton<UserHandler>();
+			services.AddSingleton<UserHandler>();
+
+			services.AddSingleton<IHostedService, KafkaConsumerHandler>();
 
 			services.AddTransient<IProfileService, IdentityClaimsProfileService>();
 
@@ -119,7 +119,7 @@ namespace Identity_Service
 				endpoints.MapControllers();
 			});
 		}
-		//
+
 		private void InitializeDatabase(IApplicationBuilder app)
 		{
 			using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
