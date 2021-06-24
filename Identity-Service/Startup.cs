@@ -77,11 +77,11 @@ namespace Identity_Service
 
 			services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
 				.AddCookie();
+			
 
 			services.AddSingleton<IHostedService, KafkaConsumerHandler>();
 			services.AddSingleton<UserHandler>();
 
-			services.AddCors();
 			services.AddTransient<IProfileService, IdentityClaimsProfileService>();
 
 			services.AddControllers();
@@ -108,14 +108,7 @@ namespace Identity_Service
 				app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Identity_Service v1"));
 			}
 
-			app.UseCors(options =>
-			{
-				options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
-			});
-
 			app.UseIdentityServer();
-
-			app.UseHttpsRedirection();
 
 			app.UseRouting();
 
