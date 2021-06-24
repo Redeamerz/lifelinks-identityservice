@@ -79,8 +79,8 @@ namespace Identity_Service
 				.AddCookie();
 			
 
-			services.AddSingleton<IHostedService, KafkaConsumerHandler>();
-			services.AddSingleton<UserHandler>();
+			//services.AddSingleton<IHostedService, KafkaConsumerHandler>();
+			//services.AddSingleton<UserHandler>();
 
 			services.AddTransient<IProfileService, IdentityClaimsProfileService>();
 
