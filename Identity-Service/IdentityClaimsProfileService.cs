@@ -33,7 +33,6 @@ namespace Identity_Service
 			claims = claims.Where(claim => context.RequestedClaimTypes.Contains(claim.Type)).ToList();
 			claims.Add(new Claim(JwtClaimTypes.PreferredUserName, user.UserName));
 			claims.Add(new Claim(IdentityServerConstants.StandardScopes.Email, user.Email));
-
 			foreach (string role in roles) claims.Add(new Claim(JwtClaimTypes.Role, role));
 
 			context.IssuedClaims = claims;

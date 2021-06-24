@@ -54,7 +54,6 @@ namespace Identity_Service.Controllers
 
 			await userManager.AddToRoleAsync(user, role);
 			await userManager.AddClaimAsync(user, new Claim("userName", user.UserName));
-			await userManager.AddClaimAsync(user, new Claim("email", user.Email));
 			await userManager.AddClaimAsync(user, new Claim("role", role));
 
 			return Created("api.lifelinks.nl/api/account/register", user);
