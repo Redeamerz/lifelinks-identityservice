@@ -1,4 +1,5 @@
 using Identity_Service.Data;
+using Identity_Service.Logic;
 using Identity_Service.Models;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Mappers;
@@ -76,6 +77,9 @@ namespace Identity_Service
 
 			services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
 				.AddCookie();
+
+			services.AddSingleton<IHostedService, KafkaConsumerHandler>();
+			services.AddSingleton<UserHandler>();
 
 			services.AddCors();
 			services.AddTransient<IProfileService, IdentityClaimsProfileService>();
