@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Security.Claims;
+﻿using Identity_Service.Models;
 using IdentityModel;
 using IdentityServer4;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
-using Identity_Service.Models;
 using Microsoft.AspNetCore.Identity;
+using System;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Identity_Service
 {
@@ -23,6 +22,7 @@ namespace Identity_Service
 			this.userManager = userManager;
 			this.claimsFactory = claimsFactory;
 		}
+
 		public async Task GetProfileDataAsync(ProfileDataRequestContext context)
 		{
 			var sub = context.Subject.GetSubjectId();
@@ -36,7 +36,6 @@ namespace Identity_Service
 			foreach (string role in roles) claims.Add(new Claim(JwtClaimTypes.Role, role));
 
 			context.IssuedClaims = claims;
-
 		}
 
 		public async Task IsActiveAsync(IsActiveContext context)

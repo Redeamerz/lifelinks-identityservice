@@ -10,8 +10,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -63,7 +61,6 @@ namespace Identity_Service.Controllers
 		public async Task<IActionResult> UpdateAccount([FromBody] UpdateModel model)
 		{
 			if (!ModelState.IsValid) return BadRequest(model);
-
 
 			var user = await userManager.FindByIdAsync(model.Id);
 

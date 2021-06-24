@@ -1,11 +1,9 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using Confluent.Kafka;
+using Identity_Service.Logic;
+using Microsoft.Extensions.Hosting;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Confluent.Kafka;
-using Identity_Service.Logic;
 
 namespace Identity_Service
 {
@@ -15,6 +13,7 @@ namespace Identity_Service
 		private readonly UserHandler userHandler;
 		private readonly IConsumer<Ignore, string> kafkaConsumer;
 		private readonly ConsumerConfig config;
+
 		public KafkaConsumerHandler(UserHandler userHandler)
 		{
 			this.userHandler = userHandler;
@@ -32,22 +31,6 @@ namespace Identity_Service
 			new Thread(() => StartConsumerLoop(cancellationToken)).Start();
 
 			return Task.CompletedTask;
-
-			//builder.Subscribe(topic);
-			//var cancelToken = new CancellationTokenSource();
-			//try
-			//{
-			//	while (true)
-			//	{
-			//		var consumer = builder.Consume(cancelToken.Token);
-			//		Console.WriteLine($"Message: {consumer.Message.Value} received from {consumer.TopicPartitionOffset}");
-			//		userHandler.DeleteUserById(consumer.Message.Value);
-			//	}
-			//}
-			//catch (Exception)
-			//{
-			//	builder.Close();
-			//}
 		}
 
 		private void StartConsumerLoop(CancellationToken cancellationToken)

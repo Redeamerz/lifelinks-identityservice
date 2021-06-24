@@ -3,9 +3,6 @@ using Identity_Service.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Identity_Service.Logic
 {
@@ -33,7 +30,6 @@ namespace Identity_Service.Logic
 						return;
 					}
 					await userManager.DeleteAsync(user);
-					
 				}
 				catch (Exception e)
 				{

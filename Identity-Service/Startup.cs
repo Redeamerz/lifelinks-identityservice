@@ -7,22 +7,17 @@ using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using Serilog.Formatting.Json;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 
 namespace Identity_Service
 {
@@ -47,7 +42,6 @@ namespace Identity_Service
 				.AddEntityFrameworkStores<ApplicationDbContext>()
 				.AddDefaultTokenProviders();
 
-
 			var migrationAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
 
 			// configure identity server with in-memory stores, keys, clients and scopes
@@ -55,14 +49,12 @@ namespace Identity_Service
 				.AddDeveloperSigningCredential()
 				.AddAspNetIdentity<AppUser>()
 
-
 			.AddConfigurationStore(options =>
 			{
 				options.ConfigureDbContext = builder =>
 
 					builder.UseMySql(Configuration.GetConnectionString("Default"), new MySqlServerVersion(new Version(8, 0, 21)),
 						mySql => mySql.MigrationsAssembly(migrationAssembly));
-
 			})
 			.AddOperationalStore(options =>
 			{
