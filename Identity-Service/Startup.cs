@@ -119,6 +119,7 @@ namespace Identity_Service
 				endpoints.MapControllers();
 			});
 		}
+		//
 		private void InitializeDatabase(IApplicationBuilder app)
 		{
 			using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
